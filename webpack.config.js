@@ -1,53 +1,31 @@
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
-    devtool: 'source-map',
-    optimization: {
-        splitChunks: {
-            cacheGroups: {
-                commons: {
-                    test: /[\\/]node_modules[\\/]/,
-                    name: "common",
-                    chunks: "all"
-                }
-            }
-        }
-    },
     entry: [
-        './src/visitor.js',
-        './src/admin.js'
+        './index.html',
+        './src/js/index.js'
     ],
-    watch: true,
+    devtool: 'source-map',
     output: {
-        path: path.join(__dirname, 'build'),
+        path: path.resolve(__dirname, 'build'),
         filename: 'bundle.js',
-        publicPath: '/build/'
+        publicPath: 'build/'
     },
-    plugins: [
-        new CleanWebpackPlugin(['build/*.*']),
-        new HtmlWebpackPlugin()
-    ],
+    devServer: {
+        overlay: true
+    },
     module: {
         rules: [
             {
-                test: /\.html$/,
-                use: {
-                    loader: 'html-loader',
-                    options: {
-                        attrs: [':data-src']
-                    }
-                }
-            },
-            {
                 test: /\.(js|jsx)$/,
-                exclude: /node_modules/,
+                exclude: '/node_modules/',
                 use: [
                     {
                         loader: 'babel-loader',
                         options: {
-                            presets: ["env"]
+                            presets: ['env', 'stage-3']
                         }
                     }
                 ]
@@ -63,18 +41,27 @@ module.exports = {
             },
             {
                 test: /\.scss$/,
-                use: [
-                    {
-                        loader: 'style-loader'
-                    },
-                    {
-                        loader: 'css-loader'
-                    },
-                    {
-                        loader: 'sass-loader'
-                    }
-                ]
-            }
+                use: ExtractTextPlugin.extract({
+                    fallback: 'style-loader',
+                    use: ['css-loader', 'sass-loader']
+                })
+            },
+            {
+                test: /\.html$/,
+                loader: 'file-loader?name=[name].[ext]',
+            },
         ]
-    }
+    },
+    plugins: [
+        new ExtractTextPlugin('styles.css'),
+        new CleanWebpackPlugin(
+            ['build'],
+            {
+                root: __dirname,
+                verbose: true,
+                dry: false,
+                exclude: []
+            }
+        )
+    ]
 };

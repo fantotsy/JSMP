@@ -3,18 +3,30 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
-    entry: [
-        './index.html',
-        './src/js/index.js'
-    ],
+    entry: {
+        index: './src/js/index.js',
+        admin: './src/js/admin.js',
+        visitor: './src/js/visitor.js'
+    },
     devtool: 'source-map',
     output: {
         path: path.resolve(__dirname, 'build'),
-        filename: 'bundle.js',
+        filename: '[name].js',
         publicPath: 'build/'
     },
     devServer: {
         overlay: true
+    },
+    optimization: {
+        splitChunks: {
+            chunks: "all",
+            minSize: 0,
+            cacheGroups: {
+                default: {
+                    name: 'common'
+                }
+            }
+        }
     },
     module: {
         rules: [
